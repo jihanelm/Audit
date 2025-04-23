@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date, Boolean, func, Text, JSON
+from sqlalchemy.orm import relationship
 from sqlalchemy_utils import EmailType
 
 from database import Base
@@ -53,12 +54,13 @@ class Demande_Audit(Base):
     url_app = Column(String(100), nullable=False)
     compte_test_profile = Column(Text, nullable=False)
 
-
     urgence = Column(String(50), nullable=False)
-
 
     fichiers_attaches = Column(JSON, nullable=True)
     fiche_demande_path = Column(String(255), nullable=True)
+
+    affectations = relationship("Affect", back_populates="demande_audit")
+    #plans = relationship("Plan", back_populates="audit")
 
     def __repr__(self):
         return f"<Audit(id={self.id}, etat={self.etat})>"
