@@ -4,8 +4,8 @@ from database import Base
 from backend.models.associations import affect_auditeur, affect_ip
 from datetime import date
 
-class Affect(Base):
-    __tablename__ = "affects"
+class Affectation(Base):
+    __tablename__ = "affectations"
 
     id = Column(Integer, primary_key=True, index=True)
     demande_audit_id = Column(Integer, ForeignKey("demandes_audits.id"), nullable=False)
