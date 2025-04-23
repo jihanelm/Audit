@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import Session
 
 from database import Base
-from backend.models.plan import Plan
+#from backend.models.plan import Plan
 
 affect_auditeur = Table(
     "affect_auditeur",
