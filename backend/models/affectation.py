@@ -13,7 +13,7 @@ class Affectation(Base):
     affectationpath = Column(String(255), nullable=True)
     prestataire_id = Column(Integer, ForeignKey("prestataires.id"))
 
-    demande_audit = relationship("Demande Audit", back_populates="affectationss")
-    auditeurs = relationship("Auditeur", secondary=affect_auditeur, back_populates="affects")
+    demande_audit = relationship("Demande_Audit", back_populates="affectations")
+    auditeurs = relationship("Auditeur", secondary=affect_auditeur, back_populates="affectations")
     prestataire = relationship("Prestataire", back_populates="affectations")
     ips = relationship("IP", secondary=affect_ip, back_populates="affectation")

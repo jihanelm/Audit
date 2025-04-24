@@ -59,7 +59,7 @@ class Demande_Audit(Base):
     fichiers_attaches = Column(JSON, nullable=True)
     fiche_demande_path = Column(String(255), nullable=True)
 
-    affectations = relationship("Affect", back_populates="demande_audit")
+    affectations = relationship("Affectation", back_populates="demande_audit")
     #plans = relationship("Plan", back_populates="audit")
 
     def __repr__(self):

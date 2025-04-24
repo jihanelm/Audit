@@ -7,14 +7,14 @@ from database import Base
 affect_auditeur = Table(
     "affect_auditeur",
     Base.metadata,
-    Column("affect_id", Integer, ForeignKey("affects.id"), primary_key=True),
+    Column("affectation_id", Integer, ForeignKey("affectations.id"), primary_key=True),
     Column("auditeur_id", Integer, ForeignKey("auditeurs.id"), primary_key=True)
 )
 
 affect_ip = Table(
     "affect_ip",
     Base.metadata,
-    Column("affect_id", Integer, ForeignKey("affects.id"), primary_key=True),
+    Column("affectation_id", Integer, ForeignKey("affectations.id"), primary_key=True),
     Column("ip_id", Integer, ForeignKey("ips.id"), primary_key=True)
 )
 

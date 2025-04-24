@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import JSONResponse
 
 from backend.routes.demande_audit import (router as demande_audit_router)
+from backend.routes.affectation import (router as affectation_router)
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 
@@ -21,11 +22,12 @@ app.add_middleware(
 
 
 app.include_router(demande_audit_router, prefix="/audits", tags=["Audits"])
+app.include_router(affectation_router, prefix="/affectation", tags=["Affectations"])
 
 
 app.mount("/fichiers_attaches_audit", StaticFiles(directory="fichiers_attaches_audit"), name="fichiers_attaches_audit")
 app.mount("/fiches_demandes_audit", StaticFiles(directory="fiches_demandes_audit"), name="fiches_demandes_audit")
-#app.mount("/affectations_pdfs", StaticFiles(directory="affectations_pdfs"), name="affectations")
+app.mount("/fichiers_affectations", StaticFiles(directory="fichiers_affectations"), name="fichiers_affectations")
 
 @app.get("/")
 def root():
