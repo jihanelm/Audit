@@ -24,12 +24,12 @@ def create_affectation(affect_data: AffectSchema, db: Session = Depends(get_db))
     logger.info(f"Création d'une nouvelle affectation")
     return create_affect(db, affect_data)
 
-@router.get("/affects/{affect_id}", response_model=AffectResponse, summary="Lister les affectations par ID", description="Récupère une affectation par son ID avec les informations associées (auditeurs, prestataires, audit, etc.)")
-def read_affect(affect_id: int, db: Session = Depends(get_db)):
-    logger.info(f"Lecture de l'affectation ID {affect_id}")
-    affect = get_affect(db, affect_id)
+@router.get("/affects/{affectation_id}", response_model=AffectResponse, summary="Lister les affectations par ID", description="Récupère une affectation par son ID avec les informations associées (auditeurs, prestataires, audit, etc.)")
+def read_affect(affectation_id: int, db: Session = Depends(get_db)):
+    logger.info(f"Lecture de l'affectation ID {affectation_id}")
+    affect = get_affect(db, affectation_id)
     if not affect:
-        logger.warning(f"Affectation ID {affect_id} non trouvée")
+        logger.warning(f"Affectation ID {affectation_id} non trouvée")
         raise HTTPException(status_code=404, detail="Affectation non trouvée")
     return affect
 

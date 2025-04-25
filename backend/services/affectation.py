@@ -120,7 +120,7 @@ def generate_affect_pdf(affect):
         c.setFillColor(colors.black)
 
         general_info = [
-            ["ID Audit", affect.demande_audit_id],
+            ["ID Demande Audit", affect.demande_audit_id],
             ["Nom de l'Application", affect.demande_audit.nom_app],
             ["Type d'audit", affect.type_audit],
             ["Prestataire", affect.prestataire.nom],
@@ -271,7 +271,7 @@ def get_affect(db: Session, affectation_id: int):
             joinedload(Affectation.auditeurs),
             joinedload(Affectation.ips).joinedload(IP.ports),
             joinedload(Affectation.prestataire),
-            joinedload(Affectation.audit)
+            joinedload(Affectation.demande_audit)
         )\
         .filter(Affectation.id == affectation_id)\
         .first()
