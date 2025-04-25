@@ -10,7 +10,7 @@ class IPSchema(BaseModel):
 class IPResponse(IPSchema):
     id: Optional[int]
     """status: str"""
-    affect_id: int
+    affectation_id: int
     ports: List[PortResponse]
 
     class Config:
