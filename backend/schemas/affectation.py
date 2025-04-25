@@ -10,6 +10,7 @@ from backend.schemas.ip import IPSchema
 class AffectSchema(BaseModel):
     demande_audit_id: int
     prestataire_id: int
+    type_audit: str
     auditeurs: List[AuditeurSchema]
     ips: List[IPSchema]
 
