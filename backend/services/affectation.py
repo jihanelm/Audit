@@ -38,7 +38,7 @@ def generate_affect_pdf(affect):
     # Prepare output folder
     pdf_dir = "fichiers_affectations"
     os.makedirs(pdf_dir, exist_ok=True)
-    pdf_filename = f"affect_{affect.id}.pdf"
+    pdf_filename = f"fiche_affectation_{affect.id}.pdf"
     pdf_path = os.path.join(pdf_dir, pdf_filename)
 
     # Generate PDF from HTML

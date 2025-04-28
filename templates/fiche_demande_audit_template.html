@@ -99,13 +99,10 @@
     <div class="section">
         <h3>Informations générales</h3>
         <table>
-            <tr>
-                <td><strong>Date</strong></td>
-                <td>{{ demande_audit.date_creation }}</td>
+            <tr><th>Date</th><td>{{ demande_audit.date_creation }}</td>
             </tr>
             <tr>
-                <td><strong>Nom de l'application cible</strong></td>
-                <td>{{ demande_audit.nom_app }}</td>
+                <th>Nom de l'application cible</th><td>{{ demande_audit.nom_app }}</td>
             </tr>
         </table>
     </div>
@@ -113,23 +110,23 @@
     <div class="section">
         <h3>Identification du demandeur</h3>
         <table>
-            <tr><td><strong>Nom et prénom (CP)</strong></td><td>{{ demande_audit.demandeur_nom_1 }} {{ demande_audit.demandeur_prenom_1 }}</td></tr>
-            <tr><td><strong>Entité</strong></td><td>{{ demande_audit.demandeur_entite_1 }}</td></tr>
-            <tr><td><strong>Courrier électronique</strong></td><td>{{ demande_audit.demandeur_email_1 }}</td></tr>
-            <tr><td><strong>Téléphone</strong></td><td>{{ demande_audit.demandeur_phone_1 }}</td></tr>
-            <tr><td><strong>Nom et prénom (Backup)</strong></td><td>{{ demande_audit.demandeur_nom_2 }} {{ demande_audit.demandeur_prenom_2 }}</td></tr>
-            <tr><td><strong>Entité</strong></td><td>{{ demande_audit.demandeur_entite_2 }}</td></tr>
-            <tr><td><strong>Courrier électronique</strong></td><td>{{ demande_audit.demandeur_email_2 }}</td></tr>
-            <tr><td><strong>Téléphone</strong></td><td>{{ demande_audit.demandeur_phone_2 }}</td></tr>
+            <tr><th>Nom et prénom (CP)</th><td>{{ demande_audit.demandeur_nom_1 }} {{ demande_audit.demandeur_prenom_1 }}</td></tr>
+            <tr><th>Entité</th><td>{{ demande_audit.demandeur_entite_1 }}</td></tr>
+            <tr><th>Courrier électronique</th><td>{{ demande_audit.demandeur_email_1 }}</td></tr>
+            <tr><th>Téléphone</th></td><td>{{ demande_audit.demandeur_phone_1 }}</td></tr>
+            <tr><th>Nom et prénom (Backup)</th><td>{{ demande_audit.demandeur_nom_2 }} {{ demande_audit.demandeur_prenom_2 }}</td></tr>
+            <tr><th>Entité</th><td>{{ demande_audit.demandeur_entite_2 }}</td></tr>
+            <tr><th>Courrier électronique</th><td>{{ demande_audit.demandeur_email_2 }}</td></tr>
+            <tr><th>Téléphone</th><td>{{ demande_audit.demandeur_phone_2 }}</td></tr>
         </table>
     </div>
 
     <div class="section">
         <h3>Application ou Solution à tester</h3>
         <table>
-            <tr><td><strong>Nom</strong></td><td>{{ demande_audit.nom_app }}</td></tr>
-            <tr><td><strong>Description</strong></td><td>{{ demande_audit.description }}</td></tr>
-            <tr><td><strong>Fonctionnalités concernées</strong></td><td>{{ demande_audit.liste_fonctionalites }}</td></tr>
+            <tr><th>Nom</th><td>{{ demande_audit.nom_app }}</td></tr>
+            <tr><th>Description</th><td>{{ demande_audit.description }}</td></tr>
+            <tr><th>Fonctionnalités concernées</th><td>{{ demande_audit.liste_fonctionalites }}</td></tr>
         </table>
     </div>
 
@@ -150,29 +147,29 @@
     <div class="section">
         <h3>Exigences techniques</h3>
         <table>
-            <tr><td><strong>Architecture projet</strong></td><td>{{ 'Oui' if demande_audit.architecture_projet else 'Non' }}</td></tr>
-            <tr><td><strong>Protection WAF</strong></td><td>{{ 'Oui' if demande_audit.protection_waf else 'Non' }}</td></tr>
-            <tr><td><strong>Commentaires WAF</strong></td><td>{{ demande_audit.commentaires_waf }}</td></tr>
-            <tr><td><strong>Ports ouverts</strong></td><td>{{ 'Oui' if demande_audit.ports else 'Non' }}</td></tr>
-            <tr><td><strong>Liste des ports</strong></td><td>{{ demande_audit.liste_ports }}</td></tr>
-            <tr><td><strong>Certificat SSL</strong></td><td>{{ 'Oui' if demande_audit.cert_ssl_domain_name else 'Non' }}</td></tr>
-            <tr><td><strong>Commentaires SSL</strong></td><td>{{ demande_audit.commentaires_cert_ssl_domain_name }}</td></tr>
+            <tr><th>Architecture projet</th><td>{{ 'Oui' if demande_audit.architecture_projet else 'Non' }}</td></tr>
+            <tr><th>Protection WAF</th><td>{{ 'Oui' if demande_audit.protection_waf else 'Non' }}</td></tr>
+            <tr><th>Commentaires WAF</th><td>{{ demande_audit.commentaires_waf }}</td></tr>
+            <tr><th>Ports ouverts</th><td>{{ 'Oui' if demande_audit.ports else 'Non' }}</td></tr>
+            <tr><th>Liste des ports</th><td>{{ demande_audit.liste_ports }}</td></tr>
+            <tr><th>Certificat SSL</th><td>{{ 'Oui' if demande_audit.cert_ssl_domain_name else 'Non' }}</td></tr>
+            <tr><th>Commentaires SSL</th><td>{{ demande_audit.commentaires_cert_ssl_domain_name }}</td></tr>
         </table>
     </div>
 
     <div class="section">
         <h3>Prérequis techniques</h3>
         <table>
-            <tr><td><strong>Système d'exploitation</strong></td><td>{{ demande_audit.sys_exploitation }}</td></tr>
-            <tr><td><strong>Logiciels installés</strong></td><td>{{ demande_audit.logiciels_installes }}</td></tr>
-            <tr><td><strong>Environnement de tests</strong></td><td>{{ demande_audit.env_tests }}</td></tr>
-            <tr><td><strong>Données de production</strong></td><td>{{ 'Oui' if demande_audit.donnees_prod else 'Non' }}</td></tr>
-            <tr><td><strong>SI actifs</strong></td><td>{{ demande_audit.liste_si_actifs }}</td></tr>
-            <tr><td><strong>Compte administrateur</strong></td><td>{{ demande_audit.compte_admin }}</td></tr>
-            <tr><td><strong>Nom de domaine</strong></td><td>{{ demande_audit.nom_domaine }}</td></tr>
-            <tr><td><strong>URL</strong></td><td>{{ demande_audit.url_app }}</td></tr>
-            <tr><td><strong>Profil de test</strong></td><td>{{ demande_audit.compte_test_profile }}</td></tr>
-            <tr><td><strong>Urgence</strong></td><td>{{ demande_audit.urgence }}</td></tr>
+            <tr><th>Système d'exploitation</th><td>{{ demande_audit.sys_exploitation }}</td></tr>
+            <tr><th>Logiciels installés</th><td>{{ demande_audit.logiciels_installes }}</td></tr>
+            <tr><th>Environnement de tests</th><td>{{ demande_audit.env_tests }}</td></tr>
+            <tr><th>Données de production</th><td>{{ 'Oui' if demande_audit.donnees_prod else 'Non' }}</td></tr>
+            <tr><th>SI actifs</th><td>{{ demande_audit.liste_si_actifs }}</td></tr>
+            <tr><th>Compte administrateur</th><td>{{ demande_audit.compte_admin }}</td></tr>
+            <tr><th>Nom de domaine</th><td>{{ demande_audit.nom_domaine }}</td></tr>
+            <tr><th>URL</th></td><td>{{ demande_audit.url_app }}</td></tr>
+            <tr><th>Profil de test</th><td>{{ demande_audit.compte_test_profile }}</td></tr>
+            <tr><th>Urgence</th><td>{{ demande_audit.urgence }}</td></tr>
         </table>
     </div>
 
