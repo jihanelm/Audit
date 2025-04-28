@@ -11,6 +11,13 @@ affect_auditeur = Table(
     Column("auditeur_id", Integer, ForeignKey("auditeurs.id"), primary_key=True)
 )
 
+audit_auditeur_association = Table(
+    "audit_auditeur_association",
+    Base.metadata,
+    Column("audit_id", Integer, ForeignKey("audits.id")),
+    Column("auditeur_id", Integer, ForeignKey("auditeurs.id")),
+)
+
 affect_ip = Table(
     "affect_ip",
     Base.metadata,

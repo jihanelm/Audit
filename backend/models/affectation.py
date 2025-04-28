@@ -15,6 +15,7 @@ class Affectation(Base):
     prestataire_id = Column(Integer, ForeignKey("prestataires.id"))
 
     demande_audit = relationship("Demande_Audit", back_populates="affectations")
+    audit = relationship("Audit", back_populates="affectation")
     auditeurs = relationship("Auditeur", secondary=affect_auditeur, back_populates="affectations")
     prestataire = relationship("Prestataire", back_populates="affectations")
     ips = relationship("IP", secondary=affect_ip, back_populates="affectation")

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche de demande d'audit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 100px 50px 80px 50px;
+            @bottom-right {
+                content: "Page " counter(page) " / " counter(pages);
+                font-family: "Times New Roman", Times, serif;
+                font-size: 10pt;
+            }
+            @bottom-left {
+                content: "Interne";
+                font-family: "Times New Roman", Times, serif;
+                font-size: 10pt;
+                font-style: italic;
+            }
+        }
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            position: fixed;
+            top: -80px;
+            left: 10px;
+            right: 20px;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #808080;
+            font-size: 10pt;
+        }
+        header .text-header {
+            text-align: left;
+        }
+        header .logo-header img {
+            height: 50px;
+        }
+        .main-title {
+            color: #d5191e;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        h2, h3 {
+            color: #01803D;
+            margin-top: 40px;
+            font-size: 14pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 11pt;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .intro-text {
+            margin: 20px 0;
+            font-size: 11pt;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="text-header">
+        <div>Groupe Crédit Agricole du Maroc</div>
+        <div>Direction Centrale Sécurité</div>
+        <div>Direction Sécurité de l'information</div>
+    </div>
+    <div class="logo-header">
+        <img src="{{ logo_path }}" alt="Logo">
+    </div>
+</header>
+
+<main>
+    <h1 class="main-title">Fiche de demande des audits sécurités</h1>
+
+    <div class="intro-text">
+        Cette fiche mandate l’équipe sécurité d’information GCAM à réaliser les audits de sécurité visant à évaluer le
+        niveau de sécurité de l’application cible. Le chef de projet (CP) doit remplir et faire parvenir le document par
+        courriel au responsable sécurité /équipe sécurité d’information pour validation et le lancement des différents
+        audits.
+    </div>
+
+    <div class="section">
+        <h3>Informations générales</h3>
+        <table>
+            <tr>
+                <td><strong>Date</strong></td>
+                <td>{{ demande_audit.date_creation }}</td>
+            </tr>
+            <tr>
+                <td><strong>Nom de l'application cible</strong></td>
+                <td>{{ demande_audit.nom_app }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Identification du demandeur</h3>
+        <table>
+            <tr><td><strong>Nom et prénom (CP)</strong></td><td>{{ demande_audit.demandeur_nom_1 }} {{ demande_audit.demandeur_prenom_1 }}</td></tr>
+            <tr><td><strong>Entité</strong></td><td>{{ demande_audit.demandeur_entite_1 }}</td></tr>
+            <tr><td><strong>Courrier électronique</strong></td><td>{{ demande_audit.demandeur_email_1 }}</td></tr>
+            <tr><td><strong>Téléphone</strong></td><td>{{ demande_audit.demandeur_phone_1 }}</td></tr>
+            <tr><td><strong>Nom et prénom (Backup)</strong></td><td>{{ demande_audit.demandeur_nom_2 }} {{ demande_audit.demandeur_prenom_2 }}</td></tr>
+            <tr><td><strong>Entité</strong></td><td>{{ demande_audit.demandeur_entite_2 }}</td></tr>
+            <tr><td><strong>Courrier électronique</strong></td><td>{{ demande_audit.demandeur_email_2 }}</td></tr>
+            <tr><td><strong>Téléphone</strong></td><td>{{ demande_audit.demandeur_phone_2 }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Application ou Solution à tester</h3>
+        <table>
+            <tr><td><strong>Nom</strong></td><td>{{ demande_audit.nom_app }}</td></tr>
+            <tr><td><strong>Description</strong></td><td>{{ demande_audit.description }}</td></tr>
+            <tr><td><strong>Fonctionnalités concernées</strong></td><td>{{ demande_audit.liste_fonctionalites }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Type d'application</h3>
+        {% set type_app_list = demande_audit.type_app_2.split(',') %}
+        {% set type_app_list = type_app_list | map('trim') | list %}
+
+        <table>
+            <tr><td>{% if 'Web' in demande_audit.type_app %}☑{% else %}☐{% endif %} Web</td></tr>
+            <tr><td>{% if 'Mobile' in demande_audit.type_app %}☑{% else %}☐{% endif %} Mobile</td></tr>
+            <tr><td>{% if 'Client Lourd' in demande_audit.type_app %}☑{% else %}☐{% endif %} Client Lourd</td></tr>
+            <tr><td>{% if 'Externe' in type_app_list %}☑{% else %}☐{% endif %} Externe</td></tr>
+            <tr><td>{% if 'Interne' in type_app_list %}☑{% else %}☐{% endif %} Interne</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Exigences techniques</h3>
+        <table>
+            <tr><td><strong>Architecture projet</strong></td><td>{{ 'Oui' if demande_audit.architecture_projet else 'Non' }}</td></tr>
+            <tr><td><strong>Protection WAF</strong></td><td>{{ 'Oui' if demande_audit.protection_waf else 'Non' }}</td></tr>
+            <tr><td><strong>Commentaires WAF</strong></td><td>{{ demande_audit.commentaires_waf }}</td></tr>
+            <tr><td><strong>Ports ouverts</strong></td><td>{{ 'Oui' if demande_audit.ports else 'Non' }}</td></tr>
+            <tr><td><strong>Liste des ports</strong></td><td>{{ demande_audit.liste_ports }}</td></tr>
+            <tr><td><strong>Certificat SSL</strong></td><td>{{ 'Oui' if demande_audit.cert_ssl_domain_name else 'Non' }}</td></tr>
+            <tr><td><strong>Commentaires SSL</strong></td><td>{{ demande_audit.commentaires_cert_ssl_domain_name }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Prérequis techniques</h3>
+        <table>
+            <tr><td><strong>Système d'exploitation</strong></td><td>{{ demande_audit.sys_exploitation }}</td></tr>
+            <tr><td><strong>Logiciels installés</strong></td><td>{{ demande_audit.logiciels_installes }}</td></tr>
+            <tr><td><strong>Environnement de tests</strong></td><td>{{ demande_audit.env_tests }}</td></tr>
+            <tr><td><strong>Données de production</strong></td><td>{{ 'Oui' if demande_audit.donnees_prod else 'Non' }}</td></tr>
+            <tr><td><strong>SI actifs</strong></td><td>{{ demande_audit.liste_si_actifs }}</td></tr>
+            <tr><td><strong>Compte administrateur</strong></td><td>{{ demande_audit.compte_admin }}</td></tr>
+            <tr><td><strong>Nom de domaine</strong></td><td>{{ demande_audit.nom_domaine }}</td></tr>
+            <tr><td><strong>URL</strong></td><td>{{ demande_audit.url_app }}</td></tr>
+            <tr><td><strong>Profil de test</strong></td><td>{{ demande_audit.compte_test_profile }}</td></tr>
+            <tr><td><strong>Urgence</strong></td><td>{{ demande_audit.urgence }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Pièces jointes</h3>
+        <table>
+            <tr><th>Fichier attaché</th></tr>
+            {% for fichier in fichiers %}
+                <tr><td>{{ fichier }}</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div style="text-align:center; margin-top:50px; color:#d5191e;">
+        <em><i>_Fin de document_</i></em>
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche d'Affectation d'Audit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 100px 50px 80px 50px;
+            @bottom-right {
+                content: "Page " counter(page) " / " counter(pages);
+                font-family: "Times New Roman", Times, serif;
+                font-size: 10pt;
+            }
+            @bottom-left {
+                content: "Interne";
+                font-family: "Times New Roman", Times, serif;
+                font-size: 10pt;
+                font-style: italic;
+            }
+        }
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            position: fixed;
+            top: -80px;
+            left: 10px;
+            right: 20px;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #808080;
+            font-size: 10pt;
+            padding-bottom: 5px;
+        }
+        header .text-header {
+            text-align: left;
+        }
+        header .logo-header img {
+            height: 50px;
+        }
+        .main-title {
+            color: #d5191e;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        h2 {
+            color: #01803D;
+            margin-top: 40px;
+            font-size: 14pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 11pt;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="text-header">
+        <div>Groupe Crédit Agricole du Maroc</div>
+        <div>Direction Centrale Sécurité</div>
+        <div>Direction Sécurité de l'information</div>
+    </div>
+    <div class="logo-header">
+        <img src="{{ logo_path }}" alt="Logo">
+    </div>
+</header>
+
+<main>
+
+    <div class="main-title">Fiche d'Affectation d'Audit</div>
+
+    <h2>Informations Générales:</h2>
+    <table>
+        <tr><th>ID Audit</th><td>{{ affect.demande_audit_id }}</td></tr>
+        <tr><th>Nom de l'Application</th><td>{{ affect.demande_audit.nom_app }}</td></tr>
+        <tr><th>Type d'audit</th><td>{{ affect.type_audit }}</td></tr>
+        <tr><th>Prestataire</th><td>{{ affect.prestataire.nom }}</td></tr>
+        <tr><th>Date d'affectation</th><td>{{ affect.date_affectation.strftime('%d/%m/%Y') }}</td></tr>
+    </table>
+
+    <h2>Informations du Demandeur:</h2>
+    <table>
+        <tr><th>Nom</th><td>{{ affect.demande_audit.demandeur_nom_1 }}</td></tr>
+        <tr><th>Prénom</th><td>{{ affect.demande_audit.demandeur_prenom_1 }}</td></tr>
+        <tr><th>Email</th><td>{{ affect.demande_audit.demandeur_email_1 }}</td></tr>
+        <tr><th>Téléphone</th><td>{{ affect.demande_audit.demandeur_phone_1 }}</td></tr>
+        <tr><th>Entité</th><td>{{ affect.demande_audit.demandeur_entite_1 }}</td></tr>
+    </table>
+
+    <h2>Liste des Auditeurs:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auditeur in affect.auditeurs %}
+            <tr>
+                <td>{{ auditeur.nom }}</td>
+                <td>{{ auditeur.prenom }}</td>
+                <td>{{ auditeur.email }}</td>
+                <td>{{ auditeur.phone }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>IPs affectées:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Adresse IP</th>
+                <th>Port</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ip in affect.ips %}
+                {% for port in ip.ports %}
+                    <tr>
+                        <td>{{ ip.adresse_ip }}</td>
+                        <td>{{ port.port }}</td>
+                        <td>{{ port.status }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+</main>
+
+</body>
+</html>

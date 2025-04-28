@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
-from backend.models.associations import affect_auditeur
+from backend.models.associations import audit_auditeur_association, affect_auditeur
 
 
 class Auditeur(Base):
@@ -16,3 +16,8 @@ class Auditeur(Base):
 
     prestataire = relationship("Prestataire", back_populates="auditeurs", lazy="joined")
     affectations = relationship("Affectation", secondary=affect_auditeur, back_populates="auditeurs")
+    audits = relationship(
+        "Audit",
+        secondary=audit_auditeur_association,
+        back_populates="auditeurs"
+    )

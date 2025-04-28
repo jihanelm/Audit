@@ -15,185 +15,38 @@ from backend.schemas.affectation import AffectSchema
 from backend.schemas.auditeur import AuditeurSchema
 from backend.schemas.prestataire import PrestataireSchema
 
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+
 from log_config import setup_logger
 
 logger = setup_logger()
 
 def generate_affect_pdf(affect):
-    logger.info(f"Génération du PDF pour l'affectation ID={affect.id}")
+    logger.info(f"Génération du PDF via HTML pour l'affectation ID={affect.id}")
+
+    # Load the HTML template
+    env = Environment(loader=FileSystemLoader('templates'))
+    template = env.get_template('affect_template.html')
+
+    logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "pictures", "logo.png"))
+    logo_path_url = f"file:///{logo_path.replace(os.sep, '/')}"
+
+    # Render the HTML with the data
+    html_content = template.render(affect=affect, logo_path=logo_path_url)
+
+    # Prepare output folder
     pdf_dir = "fichiers_affectations"
     os.makedirs(pdf_dir, exist_ok=True)
     pdf_filename = f"affect_{affect.id}.pdf"
     pdf_path = os.path.join(pdf_dir, pdf_filename)
 
-    try:
-        page_num = 1
-        c = canvas.Canvas(pdf_path, pagesize=A4)
-        width, height = A4
-        y = height - 2 * cm
+    # Generate PDF from HTML
+    HTML(string=html_content).write_pdf(pdf_path)
 
-        ROUGE_GCAM = colors.HexColor("#d5191e")
-        VERT_GCAM = colors.HexColor("#01803D")
+    logger.info("PDF généré avec succès via HTML.")
+    return pdf_path.replace("\\", "/")
 
-        def draw_header():
-            c.setFillColor(colors.gray)
-            c.setFont("Times-Bold", 10)
-            c.drawString(50, height - 40, "Groupe Crédit Agricole du Maroc")
-            c.setFont("Times-Roman", 10)
-            c.drawString(50, height - 55, "Direction Centrale Sécurité")
-            c.drawString(50, height - 70, "Direction Sécurité de l'information")
-
-            # Logo
-            logo_width, logo_height = 120, 60
-            logo_y = height - 80
-            try:
-                logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "pictures", "logo.png"))
-                c.drawImage(logo_path, width - 50 - logo_width, logo_y, width=logo_width, height=logo_height,
-                            preserveAspectRatio=True, mask='auto')
-            except Exception as e:
-                logger.warning(f"Erreur chargement logo: {e}")
-                c.rect(width - 50 - logo_width, height - 50, logo_width, logo_height)
-
-        def draw_footer(page_num):
-            c.setFont("Times-Italic", 10)
-            c.drawString(50, 20, "Interne")
-            c.setFont("Times-Roman", 10)
-            c.drawRightString(width - 50, 20, f"Page {page_num}")
-
-        def new_page():
-            nonlocal y, page_num
-            draw_footer(page_num)
-            c.showPage()
-            page_num += 1
-            c.setFont("Times-Roman", 12)
-            draw_header()
-            y = height - 2 * cm
-
-        def check_space(decrement=100):
-            nonlocal y
-            if y - decrement < 50:
-                new_page()
-            y -= decrement
-
-        def draw_modern_table(rows, x_start, y_start, col_widths, fill_color=colors.whitesmoke):
-            nonlocal y
-            y = y_start
-            for index, row in enumerate(rows):
-                line_count = max(len(str(cell).split('\n')) for cell in row)
-                row_height = 14 * line_count + 6
-
-                if y - row_height < 50:
-                    new_page()
-                    y = height - 2 * cm
-
-                if index % 2 == 0:
-                    c.setFillColor(fill_color)
-                    c.rect(x_start, y - row_height, sum(col_widths), row_height, fill=1, stroke=0)
-
-                c.setFillColor(colors.black)
-                x = x_start
-                for idx, cell in enumerate(row):
-                    c.rect(x, y - row_height, col_widths[idx], row_height)
-                    lines = str(cell).split('\n')
-                    for i, line in enumerate(lines):
-                        c.drawString(x + 4, y - 14 - (i * 12), line)
-                    x += col_widths[idx]
-                y -= row_height
-
-            return y - 10
-
-        draw_header()
-
-        # Titre
-        c.setFont("Times-Bold", 16)
-        c.setFillColor(ROUGE_GCAM)
-        c.drawCentredString(width / 2, height - 100, "Fiche d'Affectation d'Audit")
-        y = height - 100
-
-        check_space(30)
-        c.setFont("Times-Bold", 14)
-        c.setFillColor(VERT_GCAM)
-        c.drawString(50, y, "Informations Générales:")
-        y -= 20
-
-        c.setFont("Times-Roman", 11)
-        c.setFillColor(colors.black)
-
-        general_info = [
-            ["ID Demande Audit", affect.demande_audit_id],
-            ["Nom de l'Application", affect.demande_audit.nom_app],
-            ["Type d'audit", affect.type_audit],
-            ["Prestataire", affect.prestataire.nom],
-            ["Date d'affectation", affect.date_affectation.strftime('%d/%m/%Y')],
-        ]
-        y = draw_modern_table(general_info, 50, y, [150, 350])
-
-        # Infos Demandeur
-        if hasattr(affect, 'demande_audit') and affect.demande_audit:
-            check_space(30)
-            c.setFont("Times-Bold", 14)
-            c.setFillColor(VERT_GCAM)
-            c.drawString(50, y, "Informations du Demandeur:")
-            y -= 20
-
-            c.setFont("Times-Roman", 11)
-            c.setFillColor(colors.black)
-
-            demandeur_info = [
-                ["Champ", "Valeur"],
-                ["Nom", affect.demande_audit.demandeur_nom_1],
-                ["Prénom", affect.demande_audit.demandeur_prenom_1],
-                ["Email", affect.demande_audit.demandeur_email_1],
-                ["Téléphone", affect.demande_audit.demandeur_phone_1],
-                ["Entité", affect.demande_audit.demandeur_entite_1],
-            ]
-            y = draw_modern_table(demandeur_info, 50, y, [150, 350])
-
-        # Auditeurs
-        if hasattr(affect, 'auditeurs') and affect.auditeurs:
-            check_space(30)
-            c.setFont("Times-Bold", 14)
-            c.setFillColor(VERT_GCAM)
-            c.drawString(50, y, "Liste des Auditeurs:")
-            y -= 20
-
-            c.setFont("Times-Roman", 11)
-            c.setFillColor(colors.black)
-
-            auditeur_rows = [["Nom", "Prénom", "Email", "Téléphone"]]
-            for a in affect.auditeurs:
-                auditeur_rows.append([a.nom, a.prenom, a.email, a.phone])
-
-            y = draw_modern_table(auditeur_rows, x_start=50, y_start=y, col_widths=[100, 100, 200, 100])
-
-        # IPs + Ports
-        if hasattr(affect, 'ips') and affect.ips:
-            check_space(30)
-            c.setFont("Times-Bold", 14)
-            c.setFillColor(VERT_GCAM)
-            c.drawString(50, y, "IPs affectées:")
-            y -= 20
-
-            c.setFont("Times-Roman", 11)
-            c.setFillColor(colors.black)
-
-            ip_rows = [["Adresse IP", "Port", "Statut"]]
-            for ip in affect.ips:
-                for port in ip.ports:
-                    ip_rows.append([ip.adresse_ip, port.port, port.status])
-
-            y = draw_modern_table(ip_rows, x_start=50, y_start=y, col_widths=[200, 100, 100])
-
-        draw_footer(page_num)
-        c.save()
-
-        logger.debug(f"PDF généré avec succès : {pdf_path}")
-        logger.info("PDF généré avec succès.")
-        return pdf_path.replace("\\", "/")
-
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération du PDF : {e}", exc_info=True)
-        raise
 def create_affect(db: Session, affect_data: AffectSchema):
     logger.info("Création d'une nouvelle affectation d'audit")
     affect = Affectation(

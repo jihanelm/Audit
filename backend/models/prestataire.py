@@ -10,3 +10,4 @@ class Prestataire(Base):
 
     auditeurs = relationship("Auditeur", back_populates="prestataire")
     affectations = relationship("Affectation", back_populates="prestataire")
+    audit = relationship("Audit", back_populates="prestataire")

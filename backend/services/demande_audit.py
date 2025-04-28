@@ -17,6 +17,8 @@ from reportlab.platypus import Paragraph, Frame
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_JUSTIFY
 
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
 
 logger = setup_logger()
 
@@ -43,7 +45,7 @@ def save_uploaded_file(upload_file: UploadFile):
         logger.error("Échec de l'enregistrement du fichier '%s' : %s", upload_file.filename, str(e))
         return None
 
-def generate_audit_pdf(demande_audit) -> str:
+"""def generate_audit_pdf(demande_audit) -> str:
     pdf_path = os.path.join(PDF_DIR, f"fiche_demande_audit_{demande_audit.id}.pdf")
     try:
         page_num = 1
@@ -319,6 +321,41 @@ def generate_audit_pdf(demande_audit) -> str:
 
     except Exception as e:
         print(f"Erreur lors de la génération de la fiche: {e}")
+        return """""
+
+def generate_audit_pdf(demande_audit) -> str:
+    pdf_path = os.path.join(PDF_DIR, f"fiche_demande_audit_{demande_audit.id}.pdf")
+
+    # Load the HTML template
+    env = Environment(loader=FileSystemLoader('templates'))
+    template = env.get_template('fiche_demande_audit_template.html')
+
+    try:
+        template = env.get_template("fiche_demande_audit_template.html")
+
+        # Prepare data
+        fichiers_list = []
+        if demande_audit.fichiers_attaches:
+            if isinstance(demande_audit.fichiers_attaches, str):
+                try:
+                    fichiers_list = json.loads(demande_audit.fichiers_attaches)
+                except json.JSONDecodeError:
+                    fichiers_list = [demande_audit.fichiers_attaches]
+            else:
+                fichiers_list = demande_audit.fichiers_attaches
+        if not fichiers_list:
+            fichiers_list = ["Aucun"]
+
+        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "pictures", "logo.png"))
+        logo_path_url = f"file:///{logo_path.replace(os.sep, '/')}"
+
+        html_content = template.render(demande_audit=demande_audit, fichiers=fichiers_list, logo_path=logo_path_url)
+
+        HTML(string=html_content).write_pdf(pdf_path)
+        return pdf_path
+
+    except Exception as e:
+        print(f"Erreur lors de la génération: {e}")
         return ""
 
 def create_demande_audit(

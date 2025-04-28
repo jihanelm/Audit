@@ -60,6 +60,7 @@ class Demande_Audit(Base):
     fiche_demande_path = Column(String(255), nullable=True)
 
     affectations = relationship("Affectation", back_populates="demande_audit")
+    audit = relationship("Audit", back_populates="demande_audit")
     #plans = relationship("Plan", back_populates="audit")
 
     def __repr__(self):

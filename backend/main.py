@@ -4,6 +4,7 @@ from starlette.responses import JSONResponse
 
 from backend.routes.demande_audit import (router as demande_audit_router)
 from backend.routes.affectation import (router as affectation_router)
+from backend.routes.audit import (router as audit_router)
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 
@@ -21,8 +22,9 @@ app.add_middleware(
 )
 
 
-app.include_router(demande_audit_router, prefix="/audits", tags=["Audits"])
+app.include_router(demande_audit_router, prefix="/audits", tags=["Demandes Audits"])
 app.include_router(affectation_router, prefix="/affectation", tags=["Affectations"])
+app.include_router(audit_router, prefix="/audit", tags=["Audits"])
 
 
 app.mount("/fichiers_attaches_audit", StaticFiles(directory="fichiers_attaches_audit"), name="fichiers_attaches_audit")
