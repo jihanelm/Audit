@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.schemas.audit import AuditResponse, AuditBase
-from backend.services.audit import create_audit, get_audit, list_audits
+from backend.services.audit import create_audit, get_audit, list_audits, change_audit_etat
 from database import get_db
 from typing import List
 
@@ -31,3 +31,10 @@ def read_audit(audit_id: int, db: Session = Depends(get_db)):
 def read_affects(db: Session = Depends(get_db)):
     logger.info("Lecture de touts les audits")
     return list_audits(db)
+
+@router.put("/audits/{audit_id}/etat", summary="Changer l'état d'un audit")
+def update_etat_audit(audit_id: int, new_etat: str, db: Session = Depends(get_db)):
+    """
+    Change l'état de l'audit : En cours, Suspendu, ou Terminé
+    """
+    return change_audit_etat(db, audit_id, new_etat)

@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from database import Base
 from backend.models.associations import audit_auditeur_association
-
 
 class Audit(Base):
     __tablename__ = "audits"
@@ -12,14 +12,14 @@ class Audit(Base):
     affectation_id = Column(Integer, ForeignKey("affectations.id"), nullable=False)
     prestataire_id = Column(Integer, ForeignKey("prestataires.id"))
 
-    duree = Column(Integer, default=0)  # durée en secondes ou minutes
+    start_time = Column(DateTime, default=datetime.utcnow)
+    last_pause_time = Column(DateTime, nullable=True)
+    total_duration = Column(Float, default=0.0)  # Durée totale en jours (float)
+
+
     etat = Column(String(50), default="En cours")  # En cours, Suspendu, Terminé...
 
     demande_audit = relationship("Demande_Audit", back_populates="audit")
     affectation = relationship("Affectation", back_populates="audit")
     prestataire = relationship("Prestataire", back_populates="audit")
-    auditeurs = relationship(
-        "Auditeur",
-        secondary=audit_auditeur_association,
-        back_populates="audits"
-    )
+    auditeurs = relationship("Auditeur", secondary=audit_auditeur_association, back_populates="audits")

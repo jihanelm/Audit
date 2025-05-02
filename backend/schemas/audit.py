@@ -10,13 +10,11 @@ class AuditBase(BaseModel):
     demande_audit_id: int
     affectation_id: int
     prestataire_id: Optional[int] = None
-    auditeurs: List[AuditeurSchema]
-    duree: Optional[int] = 0
-    etat: Optional[str] = "En cours"
+    auditeur_ids: List[int]
 
 class AuditResponse(BaseModel):
     id: int
-    duree: int
+    total_duration: float  # Nombre de jours
     etat: str
     demande_audit: Optional[DemandeAuditBase]
     prestataire: Optional[PrestataireResponse]
