@@ -20,13 +20,15 @@ class Plan(Base):
     commentaire_dcsg = Column(String(255), nullable=True)
     commentaire_cp = Column(String(255), nullable=True)
 
-    #audit_id = Column(Integer, ForeignKey("audits.id"))
-    #audit = relationship("Audit", back_populates="plans")
+    vulnerabilites = relationship("Vulnerability", back_populates="plan", cascade="all, delete")
 
 
 @event.listens_for(Plan, "before_insert")
 def generate_ref(mapper, connection, target):
     session = Session(bind=connection)
+
+    if not target.date_realisation:
+        raise ValueError("La date de réalisation est requise pour générer la référence.")
 
     year = target.date_realisation.year
 

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.orm import Session
 from starlette.responses import FileResponse
 
+from backend.models.vulnerability import Vulnerability
 from database import get_db
 from backend.models.audit import Audit
 from backend.models.plan import Plan
@@ -20,22 +21,6 @@ router = APIRouter()
 @router.post("/upload")
 async def upload_plan(file: UploadFile = File(...), db: Session = Depends(get_db)):
     return await process_uploaded_plan(file, db)
-
-"""@router.put("/plans/{plan_id}/associate_audit/{audit_id}")
-def associate_audit(plan_id: int, audit_id: int, db: Session = Depends(get_db)):
-    plan = db.query(Plan).filter(Plan.id == plan_id).first()
-    audit = db.query(Audit).filter(Audit.id == audit_id).first()
-
-    if not plan:
-        raise HTTPException(status_code=404, detail="Plan non trouvé")
-    if not audit:
-        raise HTTPException(status_code=404, detail="Audit non trouvé")
-
-    plan.audit_id = audit.id
-    db.commit()
-    db.refresh(plan)
-
-    return {"message": "Audit associé avec succès", "plan_id": plan.id, "audit_id": audit.id}"""
 
 @router.get("/plans/download/")
 def download_plans(
@@ -75,7 +60,13 @@ def get_plans(
 
 @router.post("/plan/", response_model=PlanResponse)
 def create_plan(plan: PlanCreate, db: Session = Depends(get_db)):
-    db_plan = Plan(**plan.dict())
+    db_plan = Plan(**plan.dict(exclude={"vulnerabilites"}))
+
+    if plan.vulnerabilites:
+        for vuln in plan.vulnerabilites:
+            db_vuln = Vulnerability(**vuln.dict())
+            db_plan.vulnerabilites.append(db_vuln)
+
     db.add(db_plan)
     db.commit()
     db.refresh(db_plan)

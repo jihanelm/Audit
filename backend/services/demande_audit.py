@@ -46,7 +46,7 @@ def save_uploaded_file(upload_file: UploadFile):
         return None
 
 def generate_audit_pdf(demande_audit) -> str:
-    pdf_path = os.path.join(PDF_DIR, f"fiche_demande_audit_{demande_audit.id}.pdf")
+    pdf_path = os.path.join(PDF_DIR, f"fiche_demande_audit_{demande_audit.id}_{demande_audit.nom_app}_{demande_audit.date_creation}.pdf")
 
     # Load the HTML template
     env = Environment(loader=FileSystemLoader('templates'))
