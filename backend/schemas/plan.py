@@ -6,19 +6,12 @@ from datetime import date
 from backend.schemas.vulnerability import VulnerabiliteCreate, VulnerabiliteResponse
 
 
-"""class PlanBase(BaseModel):
-    #ref: str
-    application: str
-    type_application: str
-    type_audit: str
-    date_realisation: Optional[date] = None
-    date_cloture: Optional[date] = None
-    date_rapport: Optional[date] = None
-    niveau_securite: str
-    nb_vulnerabilites: str
-    taux_remediation: Optional[float] = None
-    commentaire_dcsg: str
-    commentaire_cp: str"""
+class VulnerabilitySummary(BaseModel):
+    critique: int
+    majeure: int
+    moderee: int
+    mineure: int
+    total: int
 
 class PlanBase(BaseModel):
     application: Optional[str] = None
@@ -28,7 +21,7 @@ class PlanBase(BaseModel):
     date_cloture: Optional[date] = None
     date_rapport: Optional[date] = None
     niveau_securite: Optional[str] = None
-    nb_vulnerabilites: Optional[str] = None
+    nb_vulnerabilites: Optional[VulnerabilitySummary]
     taux_remediation: Optional[float] = None
     commentaire_dcsg: Optional[str] = None
     commentaire_cp: Optional[str] = None
@@ -49,7 +42,6 @@ class PlanUpdate(BaseModel):
     date_cloture: Optional[date]
     date_rapport: Optional[date]
     niveau_securite: str
-    nb_vulnerabilites: str
     taux_remediation: Optional[float]
     commentaire_dcsg: Optional[str]
     commentaire_cp: Optional[str]

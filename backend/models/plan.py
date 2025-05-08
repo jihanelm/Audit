@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, JSON, event, func, Float
+from sqlalchemy import Column, Integer, String, Date, JSON, event, func, Float
 from sqlalchemy.orm import relationship, Session
 from database import Base
 
@@ -15,7 +15,7 @@ class Plan(Base):
     date_cloture = Column(Date, nullable=True)
     date_rapport = Column(Date, nullable=True)
     niveau_securite = Column(String(50), nullable=True)
-    nb_vulnerabilites = Column(String(200), nullable=True)
+    nb_vulnerabilites = Column(JSON, nullable=True)
     taux_remediation = Column(Float, nullable=True)
     commentaire_dcsg = Column(String(255), nullable=True)
     commentaire_cp = Column(String(255), nullable=True)
@@ -23,7 +23,7 @@ class Plan(Base):
     vulnerabilites = relationship("Vulnerability", back_populates="plan", cascade="all, delete")
 
 
-@event.listens_for(Plan, "before_insert")
+"""@event.listens_for(Plan, "before_insert")
 def generate_ref(mapper, connection, target):
     session = Session(bind=connection)
 
@@ -54,4 +54,4 @@ def generate_ref(mapper, connection, target):
     # Générer la ref
     target.ref = f"{year}_{letter}_{plan_number:02d}"
 
-    session.close()
+    session.close()"""
