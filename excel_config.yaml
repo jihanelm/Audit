@@ -1,6 +1,0 @@
-page_de_garde:
-  sheet: "Page de garde"
-  fields:
-    titre: "B2"
-    annee: "B3"
-    auteur: "B4"

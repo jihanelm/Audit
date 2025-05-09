@@ -1,10 +1,14 @@
+import os
+from copy import copy
 from datetime import datetime, date
 from io import BytesIO
 from typing import Optional, List
 
 import numpy as np
 import pandas as pd
+from bs4 import BeautifulSoup
 from fastapi import HTTPException, UploadFile
+from openpyxl.styles import PatternFill
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session, joinedload
 from backend.models.plan import Plan
@@ -12,8 +16,14 @@ from backend.models.vulnerability import Vulnerability
 from backend.schemas.plan import PlanUpdate, VulnerabilitySummary, PlanResponse
 
 from collections import defaultdict, Counter
+from openpyxl import load_workbook, Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
-from backend.schemas.vulnerability import VulnerabiliteUpdate, VulnerabiliteResponse
+from openpyxl.drawing.image import Image as XLImage
+
+from openpyxl.styles import Font, Alignment
+
+from backend.schemas.vulnerability import VulnerabiliteResponse
 from log_config import setup_logger
 
 logger = setup_logger()
@@ -118,25 +128,24 @@ async def process_uploaded_plan(file: UploadFile, db: Session):
         raise HTTPException(status_code=500, detail="Erreur de traitement du fichier.")
 
 def export_plans_to_excel(
-        db: Session,
-        ref: Optional[str] = None,
-        application: Optional[str] = None,
-        type_audit: Optional[str] = None,
-        niveau_securite: Optional[str] = None,
-        # Filtres exacts
-        date_realisation: Optional[str] = None,
-        date_cloture: Optional[str] = None,
-        date_rapport: Optional[str] = None,
-        # Filtres par année/mois
-        realisation_year: Optional[int] = None,
-        realisation_month: Optional[int] = None,
-        cloture_year: Optional[int] = None,
-        cloture_month: Optional[int] = None,
-        rapport_year: Optional[int] = None,
-        rapport_month: Optional[int] = None,
+    db: Session,
+    ref: Optional[str] = None,
+    application: Optional[str] = None,
+    type_audit: Optional[str] = None,
+    niveau_securite: Optional[str] = None,
+    date_realisation: Optional[str] = None,
+    date_cloture: Optional[str] = None,
+    date_rapport: Optional[str] = None,
+    realisation_year: Optional[int] = None,
+    realisation_month: Optional[int] = None,
+    cloture_year: Optional[int] = None,
+    cloture_month: Optional[int] = None,
+    rapport_year: Optional[int] = None,
+    rapport_month: Optional[int] = None,
 ):
     query = db.query(Plan).options(joinedload(Plan.vulnerabilites))
 
+    # Filtres
     if ref:
         query = query.filter(Plan.ref.ilike(f"%{ref}%"))
     if application:
@@ -145,26 +154,20 @@ def export_plans_to_excel(
         query = query.filter(Plan.type_audit == type_audit)
     if niveau_securite:
         query = query.filter(Plan.niveau_securite == niveau_securite)
-
-    # Filtres exacts sur les dates
     if date_realisation:
         query = query.filter(Plan.date_realisation == date_realisation)
     if date_cloture:
         query = query.filter(Plan.date_cloture == date_cloture)
     if date_rapport:
         query = query.filter(Plan.date_rapport == date_rapport)
-
-    # Filtres par année/mois
     if realisation_year:
         query = query.filter(extract('year', Plan.date_realisation) == realisation_year)
     if realisation_month:
         query = query.filter(extract('month', Plan.date_realisation) == realisation_month)
-
     if cloture_year:
         query = query.filter(extract('year', Plan.date_cloture) == cloture_year)
     if cloture_month:
         query = query.filter(extract('month', Plan.date_cloture) == cloture_month)
-
     if rapport_year:
         query = query.filter(extract('year', Plan.date_rapport) == rapport_year)
     if rapport_month:
@@ -174,13 +177,12 @@ def export_plans_to_excel(
     if not plans:
         return None
 
+    # Construction des données
     combined_data = []
-
     for plan in plans:
         if plan.vulnerabilites:
             for vuln in plan.vulnerabilites:
                 combined_data.append({
-                    "ID Plan": plan.id,
                     "Réf": plan.ref,
                     "Application/Solution": plan.application,
                     "Type d'application": plan.type_application,
@@ -189,9 +191,9 @@ def export_plans_to_excel(
                     "Date de cloture de la mission": plan.date_cloture,
                     "Date de communication du rapport": plan.date_rapport,
                     "Niveau de securité": plan.niveau_securite,
-                    "Nombre de vulnérabilités": plan.nb_vulnerabilites,
-                    "Commentaire DCSG": plan.commentaire_dcsg,
-                    "Commentaire CP": plan.commentaire_cp,
+                    "Nombre de vulnérabilités": format_vulnerabilites(plan.nb_vulnerabilites),
+                    "Commentaire DCSG": clean_html(plan.commentaire_dcsg),
+                    "Commentaire CP": clean_html(plan.commentaire_cp),
                     "Titre vulnérabilité": vuln.titre,
                     "Criticité": vuln.criticite,
                     "Pourcentage de remédiation": vuln.pourcentage_remediation,
@@ -200,7 +202,6 @@ def export_plans_to_excel(
                 })
         else:
             combined_data.append({
-                "ID Plan": plan.id,
                 "Réf": plan.ref,
                 "Application/Solution": plan.application,
                 "Type d'application": plan.type_application,
@@ -219,10 +220,92 @@ def export_plans_to_excel(
                 "Actions": ""
             })
 
-    file_path = f"plans_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    # Chemin vers le modèle de la page de garde
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    cover_path = os.path.join(current_dir, '..', '..', 'Page_de_garde.xlsx')
 
-    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-        pd.DataFrame(combined_data).to_excel(writer, sheet_name="Plans avec vulnérabilités", index=False)
+    # Charger la page de garde existante
+    cover_wb = load_workbook(cover_path)
+    cover_ws = cover_wb.active
+
+    # Nouveau fichier final
+    final_wb = Workbook()
+    final_wb.remove(final_wb.active)
+
+    CRITICITE_COLOR_MAP = {
+        "mineure": PatternFill(start_color="A9D08E", end_color="A9D08E", fill_type="solid"),
+        "moderee": PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid"),
+        "majeure": PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid"),
+        "critique": PatternFill(start_color="C00000", end_color="C00000", fill_type="solid"),
+    }
+
+    # Copier chaque cellule avec son style
+    new_cover_ws = final_wb.create_sheet("Page de garde")
+    for row in cover_ws.iter_rows():
+        for cell in row:
+            new_cell = new_cover_ws.cell(row=cell.row, column=cell.column, value=cell.value)
+            if cell.has_style:
+                new_cell.font = copy(cell.font)
+                new_cell.border = copy(cell.border)
+                new_cell.fill = copy(cell.fill)
+                new_cell.number_format = copy(cell.number_format)
+                new_cell.protection = copy(cell.protection)
+                new_cell.alignment = copy(cell.alignment)
+
+    # Gérer la largeur des colonnes
+    for col_letter, dim in cover_ws.column_dimensions.items():
+        new_cover_ws.column_dimensions[col_letter].width = dim.width
+
+    # Gérer les fusions
+    for merged_cell in cover_ws.merged_cells.ranges:
+        new_cover_ws.merge_cells(str(merged_cell))
+
+    # Ajouter une image à la page de garde (entre C18 et F24)
+    image_path = os.path.join(current_dir, '..', '..', 'pictures', 'logo.png')
+    if os.path.exists(image_path):
+        img = XLImage(image_path)
+
+        img.width = 64 * 4  # ≈ 256 pixels
+        img.height = 20 * 7  # ≈ 140 pixels
+
+        new_cover_ws.add_image(img, 'C18')  # Position d’ancrage
+
+    # Ajouter les données "Plans"
+    plans_ws = final_wb.create_sheet("Plans")
+    df = pd.DataFrame(combined_data)
+
+    for r in dataframe_to_rows(df, index=False, header=True):
+        plans_ws.append(r)
+
+    # Appliquer une mise en forme à la première ligne (en-tête)
+    header_fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+    header_font = Font(bold=True)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    for cell in plans_ws[1]:  # Ligne 1 = en-tête
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+
+    # Appliquer le style de couleur selon la criticité
+    criticite_column_index = None
+    for idx, cell in enumerate(plans_ws[1], start=1):
+        if cell.value == "Criticité":
+            criticite_column_index = idx
+            break
+
+    if criticite_column_index:
+        for row in plans_ws.iter_rows(min_row=2, min_col=criticite_column_index, max_col=criticite_column_index):
+            for cell in row:
+                criticite_value = str(cell.value).strip().lower() if cell.value else ""
+                if criticite_value in CRITICITE_COLOR_MAP:
+                    cell.fill = CRITICITE_COLOR_MAP[criticite_value]
+
+    # Sauvegarde
+    EXPORT_DIR = os.path.join(current_dir, '..', '..', 'exports_plan')
+    os.makedirs(EXPORT_DIR, exist_ok=True)
+    file_path = os.path.join(EXPORT_DIR, f"plans_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx")
+    final_wb.save(file_path)
 
     return file_path
 
@@ -371,3 +454,31 @@ def compute_taux_remediation(vulnerabilites: List[Vulnerability]) -> float:
     if not valeurs:
         return 0.0
     return round(sum(valeurs) / len(valeurs), 2)
+
+
+def format_vulnerabilites(vuln_dict):
+    if not vuln_dict:
+        return "0 vulnérabilités"
+
+    total = vuln_dict.get("total", 0)
+    critique = vuln_dict.get("critique", 0)
+    majeure = vuln_dict.get("majeure", 0)
+    moderee = vuln_dict.get("moderee", 0)
+    mineure = vuln_dict.get("mineure", 0)
+
+    lines = [f"{total} vulnérabilités"]
+    if critique:
+        lines.append(f"({critique}) Critiques")
+    if majeure:
+        lines.append(f"({majeure}) Majeure")
+    if moderee:
+        lines.append(f"({moderee}) Moderee")
+    if mineure:
+        lines.append(f"({mineure}) Mineur")
+
+    return "\n".join(lines)
+
+def clean_html(raw_html):
+    if not raw_html:
+        return ""
+    return BeautifulSoup(raw_html, "html.parser").get_text(separator=" ").strip()
