@@ -16,7 +16,6 @@ class Audit(Base):
     last_pause_time = Column(DateTime, nullable=True)
     total_duration = Column(Float, default=0.0)  # Durée totale en jours (float)
 
-
     etat = Column(String(50), default="En cours")  # En cours, Suspendu, Terminé...
 
     demande_audit = relationship("Demande_Audit", back_populates="audit")

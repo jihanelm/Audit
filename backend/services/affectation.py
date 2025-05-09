@@ -136,7 +136,12 @@ def get_affect(db: Session, affectation_id: int):
 
 def list_affects(db: Session):
     logger.info("Récupération de toutes les affectations")
-    affects = db.query(Affectation).all()
+    affects = db.query(Affectation).options(
+        joinedload(Affectation.auditeurs),
+        joinedload(Affectation.ips).joinedload(IP.ports),
+        joinedload(Affectation.prestataire),
+        joinedload(Affectation.demande_audit)
+    ).all()
     logger.info(f"{len(affects)} affectation(s) récupérée(s)")
     return affects
 
